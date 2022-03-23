@@ -1,0 +1,12 @@
+kafka:
+  server:
+    - kafka:9092
+  group: AccountConsumer
+
+db:
+  driver:mysql
+  host:db
+  port:3306
+  username:test
+  password:test
+  database:example

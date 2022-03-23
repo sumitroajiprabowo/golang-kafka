@@ -1,0 +1,45 @@
+@baseUrl = http://localhost:8000
+
+###
+POST {{baseUrl}}/openAccount
+Accept: application/json
+Content-Type: application/json
+
+{
+    "AccountHolder": "Test",
+    "AccountType": 1,
+    "OpeningBalance": 100
+}
+
+###
+@idAccount = {{ openaccount.response.body.id }}
+
+###
+
+POST {{baseUrl}}/depositfund
+Accept: application/json
+Content-Type: application/json
+
+{
+    "id": "{{idAccount}}",
+    "Amount": 100
+}
+
+###
+POST {{baseUrl}}/withdrawfund
+Accept: application/json
+Content-Type: application/json
+
+{
+    "id": "{{idAccount}}",
+    "Amount": 100
+}
+
+###
+POST {{baseUrl}}/closeAccount
+Accept: application/json
+Content-Type: application/json
+
+{
+    "id": "{{idAccount}}"
+}

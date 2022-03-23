@@ -24,3 +24,56 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  db:
+    image: mysql
+    restart: always
+    container_name: db_mysql
+    cap_add:
+      - SYS_NICE  # CAP_SYS_NICE
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: example
+      MYSQL_USER: test
+      MYSQL_PASSWORD: test
+      TZ: 'Asia/Jakarta'
+    volumes:
+        - ./mysql/data/sql_data/:/docker-entrypoint-initdb.d
+        - ./mysql/data/conf.d/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+        - db_data:/var/lib/mysql
+    ports:
+      - 3306:3306
+
+  go_consumer:
+    restart: always
+    container_name: go_consumer
+    build:
+      context: ./consumer
+    command: /bin/sh -c "go run main.go"
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/app/consumer
+    depends_on:
+      - db
+      - kafka
+
+  go_producer:
+    restart: always
+    container_name: go_producer
+    build:
+      context: ./producer
+    command: /bin/sh -c "go run main.go"
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/app/producer
+    ports:
+      - 8000:8000
+    depends_on:
+      - go_consumer
+      - kafka
+
+volumes:
+    db_data:
